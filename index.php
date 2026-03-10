@@ -1,4 +1,12 @@
-<?php include 'config.php'; ?>
+<?php include 'config.php';
+if (isset($_COOKIE['token'])) {
+    $nimasile = $_COOKIE['token'];
+} else {
+    //跳转upload.php
+    header('Location: upload.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html>
 
