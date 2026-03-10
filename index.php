@@ -364,8 +364,15 @@
         <div class="card">
             <div class="header">
                 <h2><?php echo $web_title; ?></h2>
-                <div class="title"><?php $content = file_get_contents($yiyanapi);
-                                    echo $content; ?></div>
+                <div class="title"><?php
+                                    $content = false;
+                                    try {
+                                        $content = file_get_contents($yiyanapi);
+                                    } catch (Exception $e) {
+                                        // 忽略错误
+                                    }
+                                    echo $content ? $content : '欢迎访问';
+                                    ?></div>
             </div>
             <div class="colorband"></div>
             <div class="desc">
@@ -511,10 +518,27 @@
                     <?php
                     // 获取RSS内容
                     $rss_url = $rss_feed;
-                    $rss_content = file_get_contents($rss_url);
+                    $rss_content = false;
+
+                    // 尝试获取RSS内容，处理SSL和网络错误
+                    $context = stream_context_create([
+                        'ssl' => [
+                            'verify_peer' => false,
+                            'verify_peer_name' => false,
+                        ],
+                    ]);
+
+                    try {
+                        $rss_content = file_get_contents($rss_url, false, $context);
+                    } catch (Exception $e) {
+                        // 忽略错误，稍后会显示无法加载的消息
+                    }
 
                     // 解析RSS
-                    $rss = simplexml_load_string($rss_content);
+                    $rss = false;
+                    if ($rss_content) {
+                        $rss = simplexml_load_string($rss_content);
+                    }
 
                     // 显示RSS内容
                     if ($rss) {
