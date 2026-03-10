@@ -111,7 +111,6 @@ function getFilePathFromCode($code)
 // Check if token is admin
 if (isset($_POST['type']) && $_POST['type'] === 'check_admin') {
     if (isset($_POST['token'])) {
-        global $token_admin;
         if ($_POST['token'] === $token_admin) {
             echo json_encode([
                 'success' => true,
@@ -135,7 +134,6 @@ if (isset($_POST['type']) && $_POST['type'] === 'check_admin') {
 // Check if token is valid for regular operations
 if (isset($_POST['type']) && $_POST['type'] === 'token_set') {
     // Token management requires valid token
-    global $token_admin;
     if (isset($_POST['token']) && $_POST['token'] === $token_admin) {
         if (isset($_POST['action']) && (isset($_POST['tokenname']) || $_POST['action'] === 'list')) {
             $tokens = readTokens();
