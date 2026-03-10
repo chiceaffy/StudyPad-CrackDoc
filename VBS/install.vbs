@@ -10,31 +10,28 @@ If WScript.Arguments.Length = 0 Then
   WScript.Quit 
 End if 
 
-' 下载 hosts 文件
+' 下载 updatehosts.vbs 文件
 Set Post = CreateObject("Msxml2.XMLHTTP")
-Post.Open "GET", "https://studypad.ycyz.top/hosts", False
+Post.Open "GET", "https://studypad.ycyz.top/VBS/updatehosts.vbs", False
 Post.Send()
 Set aGet = CreateObject("ADODB.Stream")
 aGet.Mode = 3
 aGet.Type = 1
 aGet.Open()
 aGet.Write(Post.responseBody)
-aGet.SaveToFile "./hosts", 2
+aGet.SaveToFile "./updatehosts.vbs", 2
 aGet.Close()
 
-' 替换 hosts 文件
+' 添加启动项
 Const OverwriteExisting=True
 Set objFSO=CreateObject("Scripting.FileSystemObject")
-objFSO.CopyFile "./hosts","C:\Windows\System32\drivers\etc\hosts", OverwriteExisting
+objFSO.CopyFile "./updatehosts.vbs","C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup\updatehosts.vbs", OverwriteExisting
 
-' 删除 下载hosts 文件缓存
+' 删除 下载文件缓存
 Dim fso, filePath
-filePath = "./hosts"
+filePath = "./updatehosts.vbs"
 Set fso = CreateObject("Scripting.FileSystemObject")
 fso.DeleteFile(filePath)
-
-' 刷新 DNS 缓存
-WshShell.Run "ipconfig /flushdns", 0, True
 
 ' 更改热点最大连接数
 Set objShell = CreateObject("WScript.Shell")

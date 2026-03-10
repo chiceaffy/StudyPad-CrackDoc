@@ -6,15 +6,15 @@ $background_url = "https://api.xhuaxs.com/wallpaper"; //背景图片
 $message_p = "欢迎访问" . $web_title . "喵~";  //网站描述
 $yiyanapi = 'https://api.xhuaxs.com/yiyan.php'; //一言API接口
 
-//跳转链接配置
+//跳转链接配置(修改这里可以添加或删除跳转链接)
 $link_data = [
-    ["id" => 1, "name" => '必应', "link" => 'https://www.bing.com/'],
-    ["id" => 2, "name" => '抖音', "link" => 'https://www.douyin.com/'],
-    ["id" => 3, "name" => 'Geogebra', "link" => 'https://www.geogebra.org/calculator'],
-    ["id" => 4, "name" => '豆包', "link" => 'https://www.doubao.com/'],
-    ["id" => 5, "name" => '哔哩哔哩', "link" => 'https://www.bilibili.com/'],
-    ["id" => 6, "name" => '图片快传', "link" => './upload.php'],
-    ["id" => 7, "name" => '网易云游戏', "link" => 'https:///cg.163.com/'],
+    ["id" => 1, "name" => '必应', "link" => 'https://www.bing.com/', "fee" => 13],
+    ["id" => 2, "name" => '抖音', "link" => 'https://www.douyin.com/', "fee" => 8],
+    ["id" => 3, "name" => 'Geogebra', "link" => 'https://www.geogebra.org/calculator', "fee" => 3],
+    ["id" => 4, "name" => '豆包', "link" => 'https://www.doubao.com/', "fee" => 8],
+    ["id" => 5, "name" => '哔哩哔哩', "link" => 'https://www.bilibili.com/', "fee" => 7],
+    ["id" => 6, "name" => '图片快传', "link" => './upload.php', "fee" => 0],
+    ["id" => 7, "name" => '网易云游戏', "link" => 'https:///cg.163.com/', "fee" => 10],
 ];
 
 //生日预报配置

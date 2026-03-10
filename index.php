@@ -436,7 +436,8 @@ if (isset($index_require_token) && $index_require_token) {
                 if (!url.startsWith('http://') && !url.startsWith('https://')) {
                     url = 'https://' + url;
                 }
-                window.open(url, '_blank');
+                // 通过redirect.php进行自定义跳转，扣除10点额度
+                window.open('redirect.php?custom_url=' + encodeURIComponent(url), '_blank');
                 closeModal();
                 // 清空输入框
                 document.getElementById('urlInput').value = 'https://';
@@ -474,7 +475,7 @@ if (isset($index_require_token) && $index_require_token) {
             </div>
             <div class="actions">
                 <?php foreach ($link_data as $link) {
-                    echo '<a href="' . $link['link'] . '" target="_blank">
+                    echo '<a href="redirect.php?link_id=' . $link['id'] . '" target="_blank">
                     <button><span><i class="far fa-heart"></i><span class="faguang"> ' . $link['name'] . '</span></span>
                     </button>
                 </a>';
