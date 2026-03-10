@@ -312,6 +312,25 @@ include_once './config.php';
 </head>
 
 <body>
+    <?php
+    // 显示错误提示
+    if (isset($_GET['error'])) {
+        $error_message = '';
+        switch ($_GET['error']) {
+            case 'no_token':
+                $error_message = '请先设置Token才能访问主页';
+                break;
+            case 'invalid_token':
+                $error_message = 'Token无效或已用完，请重新设置';
+                break;
+        }
+        if ($error_message) {
+            echo '<div style="background: rgba(255, 100, 100, 0.9); color: white; padding: 15px; text-align: center; position: fixed; top: 0; left: 0; right: 0; z-index: 9999; font-weight: bold;">';
+            echo htmlspecialchars($error_message);
+            echo '</div>';
+        }
+    }
+    ?>
     <!-- 主容器 - 带毛玻璃效果 -->
     <div style="position: relative; text-align: center; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); max-width: 500px; width: 90%;">
         <!-- 标题区域 -->

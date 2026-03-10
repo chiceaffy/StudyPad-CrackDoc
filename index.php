@@ -1,4 +1,98 @@
-<?php include 'config.php'; ?>
+<?php
+include 'config.php';
+
+// Token file path
+$tokenFile = './upload/tokens.txt';
+
+// Function to read tokens from file
+function readTokens()
+{
+    global $tokenFile;
+    $tokens = [];
+
+    if (file_exists($tokenFile)) {
+        $lines = file($tokenFile, FILE_IGNORE_NEW_LINES);
+        foreach ($lines as $line) {
+            list($token, $count) = explode('|', $line);
+            $tokens[$token] = (int)$count;
+        }
+    }
+
+    return $tokens;
+}
+
+// Function to write tokens to file
+function writeTokens($tokens)
+{
+    global $tokenFile;
+    $content = '';
+
+    foreach ($tokens as $token => $count) {
+        $content .= $token . '|' . $count . PHP_EOL;
+    }
+
+    file_put_contents($tokenFile, $content);
+}
+
+// Function to check if token is valid and has remaining operations
+function validateToken($token)
+{
+    global $token_verification;
+
+    // If token verification is disabled, always return true
+    if (!$token_verification) {
+        return ['valid' => true, 'remaining' => -1];
+    }
+
+    // If token verification is enabled, check from file
+    $tokens = readTokens();
+
+    if (isset($tokens[$token]) && $tokens[$token] > 0) {
+        // Decrease token count
+        $remaining = $tokens[$token] - 1;
+        if ($remaining <= 0) {
+            // Remove token if remaining count is 0 or less
+            unset($tokens[$token]);
+        } else {
+            $tokens[$token] = $remaining;
+        }
+        writeTokens($tokens);
+        return ['valid' => true, 'remaining' => $remaining];
+    }
+
+    return ['valid' => false, 'remaining' => 0];
+}
+
+// 获取cookie中的token
+$token = isset($_COOKIE['upload_token']) ? $_COOKIE['upload_token'] : '';
+$token_remaining = -1; // 默认剩余次数
+
+// 验证token（仅在$index_require_token为true时）
+if (isset($index_require_token) && $index_require_token) {
+    if (empty($token)) {
+        // 没有token，跳转到upload.php
+        header('Location: upload.php?error=no_token');
+        exit;
+    } else {
+        // 验证token并减去一次剩余次数
+        $validation = validateToken($token);
+        if (!$validation['valid']) {
+            // token无效，跳转到upload.php
+            header('Location: upload.php?error=invalid_token');
+            exit;
+        }
+        $token_remaining = $validation['remaining'];
+    }
+} else {
+    // 即使不需要验证，也获取剩余次数用于显示
+    if (!empty($token)) {
+        $tokens = readTokens();
+        if (isset($tokens[$token])) {
+            $token_remaining = $tokens[$token];
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html>
 
@@ -560,44 +654,82 @@
                 </div>
             </div>
         <?php } ?>
-    </div>
 
-    <!-- 自定义跳转模态框 -->
-    <div id="urlModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>自定义跳转</h3>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="urlInput" placeholder="请输入要跳转的网址" value="https://">
-            </div>
-            <div class="modal-footer">
-                <button class="btn-confirm" onclick="submitUrl()">确定</button>
-                <button class="btn-cancel" onclick="closeModal()">取消</button>
-            </div>
+        <?php if ($token_info_display) { ?>
+            <!-- Token 信息 Card -->
+            <?php if (!empty($token)) { ?>
+                <div class="card">
+                    <div class="header">
+                        <h2>Token 信息</h2>
+                        <div class="title">当前访问凭证状态</div>
+                    </div>
+                    <div class="colorband"></div>
+                    <div class="desc">
+                        <div class="rss-item" style="text-align: left;">
+                            <p><strong>Token:</strong> <?php echo htmlspecialchars($token); ?></p>
+                            <p><strong>剩余次数:</strong>
+                                <?php
+                                if ($token_remaining == -1) {
+                                    echo '<span style="color: #666;">无限制</span>';
+                                } else if ($token_remaining <= 0) {
+                                    echo '<span style="color: #ff6b6b;">已用完</span>';
+                                } else if ($token_remaining <= 3) {
+                                    echo '<span style="color: #ff9f43;">' . $token_remaining . '</span>';
+                                } else {
+                                    echo '<span style="color: #2ecc71;">' . $token_remaining . '</span>';
+                                }
+                                ?>
+                            </p>
+                            <?php if ($token_remaining > 0 && $token_remaining != -1) { ?>
+                                <?php if ($index_require_token) { ?>
+                                    <p style="font-size: 0.8em; color: #666; margin-top: 10px;">
+                                        当前每次访问主页将消耗 1 次
+                                    </p>
+                                <?php } ?>
+                            <?php } ?>
+                        </div>
+                    </div>
+                </div>
+            <?php } ?>
+    </div>
+<?php } ?>
+
+<!-- 自定义跳转模态框 -->
+<div id="urlModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>自定义跳转</h3>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="urlInput" placeholder="请输入要跳转的网址" value="https://">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-confirm" onclick="submitUrl()">确定</button>
+            <button class="btn-cancel" onclick="closeModal()">取消</button>
         </div>
     </div>
+</div>
 
-    <!-- Footer -->
-    <style>
-        footer a {
-            color: #2f2f2d;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
+<!-- Footer -->
+<style>
+    footer a {
+        color: #2f2f2d;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
 
-        footer a:hover {
-            color: rgb(249, 185, 63, 1);
-        }
-    </style>
-    <?php if ($footer_enable) { ?>
-        <footer style="background: rgba(255, 255, 255, 0.7); border-radius: 25px; padding: 20px; margin: 20px auto; width: 90%; max-width: 500px; text-align: center; box-shadow: 0 0 60px -15px rgba(0, 0, 0, 0.25);">
-            <?php echo $footer_text; ?>
-            <p style="margin: 10px 0;">
-                <a href="https://github.com/chiceaffy/StudyPad-CrackDoc" target="_blank" style="color: #504e4e; text-decoration: none; transition: color 300ms ease;">本项目在GitHub开源(点击跳转)</a>
-            </p>
-        </footer>
-    <?php } ?>
+    footer a:hover {
+        color: rgb(249, 185, 63, 1);
+    }
+</style>
+<?php if ($footer_enable) { ?>
+    <footer style="background: rgba(255, 255, 255, 0.7); border-radius: 25px; padding: 20px; margin: 20px auto; width: 90%; max-width: 500px; text-align: center; box-shadow: 0 0 60px -15px rgba(0, 0, 0, 0.25);">
+        <?php echo $footer_text; ?>
+        <p style="margin: 10px 0;">
+            <a href="https://github.com/chiceaffy/StudyPad-CrackDoc" target="_blank" style="color: #504e4e; text-decoration: none; transition: color 300ms ease;">本项目在GitHub开源(点击跳转)</a>
+        </p>
+    </footer>
+<?php } ?>
 </body>
 
 </html>

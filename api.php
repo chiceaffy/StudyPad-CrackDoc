@@ -54,7 +54,12 @@ function validateToken($token)
     if (isset($tokens[$token]) && $tokens[$token] > 0) {
         // Decrease token count
         $remaining = $tokens[$token] - 1;
-        $tokens[$token] = $remaining;
+        if ($remaining <= 0) {
+            // Remove token if remaining count is 0 or less
+            unset($tokens[$token]);
+        } else {
+            $tokens[$token] = $remaining;
+        }
         writeTokens($tokens);
         return ['valid' => true, 'remaining' => $remaining];
     }
